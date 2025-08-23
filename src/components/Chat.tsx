@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, RefreshCw, Settings, FileText, TrendingUp, AlertCircle } from 'lucide-react';
+import { env } from '@/config/env';
 
 interface Message {
   id: string;
@@ -9,6 +10,13 @@ interface Message {
   content: string;
   timestamp: Date;
   context?: string;
+}
+
+interface ChatApiResponse {
+  response: string | any[] | any; // Can be string, array, or object
+  user_id: string;
+  session_id: string;
+  status: string;
 }
 
 export default function Chat() {
@@ -23,6 +31,9 @@ export default function Chat() {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Get user ID from environment
+  const userId = process.env.NEXT_PUBLIC_USER_ID || 'f00dc8bd-eabc-4143-b1f0-fbcb9715a02e';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -46,45 +57,151 @@ export default function Chat() {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(inputValue);
-      const assistantMessage: Message = {
+    try {
+      console.log('Chat - Making API request to chat endpoint');
+      console.log('Chat - Request payload:', { message: inputValue, user_id: userId });
+      
+      const response = await fetch(`${env.chat.baseUrl}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: inputValue,
+          user_id: userId
+        }),
+      });
+
+      console.log('Chat - Response status:', response.status);
+      console.log('Chat - Response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Chat - HTTP error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      }
+
+      const data: ChatApiResponse = await response.json();
+      console.log('Chat - Response data:', data);
+      console.log('Chat - Response type:', typeof data.response);
+      console.log('Chat - Is response array:', Array.isArray(data.response));
+
+      if (data.status === 'success' && data.response) {
+        // Parse the response to extract the text
+        let responseText = '';
+        try {
+          let responseList;
+          
+          // Check if data.response is already an array (parsed JSON)
+          if (Array.isArray(data.response)) {
+            responseList = data.response;
+          } else if (typeof data.response === 'string') {
+            console.log('Chat - Raw response string:', data.response);
+            
+            try {
+              // First, try to parse as JSON directly (handles escaped quotes)
+              responseList = JSON.parse(data.response);
+              console.log('Chat - Successfully parsed as JSON:', responseList);
+            } catch (parseError) {
+              console.log('Chat - Failed to parse as JSON, trying to clean and parse');
+              
+              try {
+                // Clean up the response string for parsing
+                let cleanedResponse = data.response;
+                
+                // Handle the specific format: "[{'text': \"...\", 'type': 'text', 'index': 0}]"
+                // Replace escaped quotes and single quotes
+                cleanedResponse = cleanedResponse
+                  .replace(/\\"/g, '"')  // Replace \" with "
+                  .replace(/'/g, '"')    // Replace ' with "
+                  .replace(/True/g, 'true')
+                  .replace(/False/g, 'false');
+                
+                console.log('Chat - Cleaned response:', cleanedResponse);
+                
+                responseList = JSON.parse(cleanedResponse);
+                console.log('Chat - Successfully parsed cleaned response:', responseList);
+              } catch (secondParseError) {
+                console.log('Chat - Failed to parse cleaned response, using regex fallback');
+                
+                // Fallback: Extract text using regex
+                const textMatch = data.response.match(/"text":\s*"([^"]*)"/);
+                if (textMatch && textMatch[1]) {
+                  responseText = textMatch[1];
+                  console.log('Chat - Extracted text using regex:', responseText);
+                } else {
+                  // Last resort: clean up the raw response
+                  responseText = data.response
+                    .replace(/[\[\]{}'"]/g, '')
+                    .replace(/text:\s*/, '')
+                    .replace(/type:\s*\w+/, '')
+                    .replace(/index:\s*\d+/, '')
+                    .trim();
+                  console.log('Chat - Using cleaned raw response:', responseText);
+                }
+                responseList = null;
+              }
+            }
+          } else {
+            // If it's an object, try to extract text directly
+            responseText = data.response.text || JSON.stringify(data.response);
+            responseList = null;
+          }
+          
+          // Extract text from the response list if it's an array
+          if (Array.isArray(responseList) && responseList.length > 0) {
+            responseText = responseList[0].text || 'No response text available';
+            console.log('Chat - Extracted text from response list:', responseText);
+          } else if (!responseText) {
+            responseText = 'Invalid response format';
+            console.log('Chat - No valid text found, using fallback');
+          }
+        } catch (parseError) {
+          console.error('Chat - Error parsing response:', parseError);
+          responseText = data.response || 'Error parsing response';
+        }
+
+        console.log('Chat - Final parsed responseText:', responseText);
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant',
+          content: responseText,
+          timestamp: new Date(),
+          context: 'AI Response',
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        throw new Error(`Invalid response from chat API: ${data.status}`);
+      }
+    } catch (error) {
+      console.error('Chat - Error calling chat API:', error);
+      
+      let errorMessage = 'Sorry, I encountered an error while processing your request. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('fetch')) {
+          errorMessage = 'Unable to connect to the chat service. Please check if the service is running.';
+        } else if (error.message.includes('HTTP error')) {
+          errorMessage = 'The chat service returned an error. Please try again later.';
+        } else {
+          errorMessage = `Error: ${error.message}`;
+        }
+      }
+      
+      const errorResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: aiResponse,
+        content: errorMessage,
         timestamp: new Date(),
-        context: 'Portfolio Analysis',
+        context: 'Error',
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-
-  const generateAIResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('apple') || input.includes('aapl')) {
-      return "Apple (AAPL) represents 15.2% of your portfolio. Recent Q2 earnings beat estimates with 8% revenue growth. The Services segment accelerated to 14% growth, and iPhone sales in China exceeded expectations. Your position is performing well despite broader market volatility.";
     }
-    
-    if (input.includes('technology') || input.includes('tech')) {
-      return "Your Technology sector allocation is 44.2%, which is overweight compared to the S&P 500. This includes AAPL (15.2%), MSFT (12.8%), GOOGL (10.5%), and NVDA (7.9%). The sector is currently down -0.8% today, driving most of your portfolio's decline.";
-    }
-    
-    if (input.includes('performance') || input.includes('how am i doing')) {
-      return "Your portfolio is up +$1,253 (+0.85%) today. Top performers: NVDA (+2.81%), AMZN (+1.86%), MSFT (+0.37%). Areas of concern: TSLA (-2.08%), AAPL (-1.21%). Overall, you're outperforming the S&P 500 by 0.3 percentage points today.";
-    }
-    
-    if (input.includes('risk') || input.includes('volatility')) {
-      return "Your portfolio shows moderate risk with 44.2% in Technology (higher volatility) and 30.1% in Financial Services (lower volatility). Consider diversifying into Healthcare (15.8%) and Consumer Discretionary (9.9%) for better risk-adjusted returns.";
-    }
-    
-    if (input.includes('earnings') || input.includes('events')) {
-      return "Upcoming events: AAPL earnings on Jan 25 (2:30 PM), MSFT product launch on Jan 26 (10:00 AM), NVDA earnings on Jan 29 (1:00 PM). These are high-impact events that could significantly affect your portfolio performance.";
-    }
-    
-    return "I can help you analyze your portfolio performance, explain market events, assess risk, and provide insights about specific holdings. Try asking about a specific stock, sector performance, or portfolio risk analysis.";
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -127,9 +244,12 @@ export default function Chat() {
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-2 mb-4">
-        <button className="px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors flex items-center gap-1">
+        <button 
+          onClick={() => setInputValue("add AMGN to my watchlist")}
+          className="px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors flex items-center gap-1"
+        >
           <TrendingUp className="w-3 h-3" />
-          Portfolio Review
+          Test AMGN Watchlist
         </button>
         <button className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-xs hover:bg-green-200 dark:hover:bg-green-800 transition-colors flex items-center gap-1">
           <FileText className="w-3 h-3" />

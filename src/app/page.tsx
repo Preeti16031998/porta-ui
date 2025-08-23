@@ -8,6 +8,7 @@ import IndustryInsights from '@/components/IndustryInsights';
 import EarningsEvents from '@/components/EarningsEvents';
 import News from '@/components/News';
 import Chat from '@/components/Chat';
+import TestWatchlist from '@/components/TestWatchlist';
 
 export default function Home() {
   return (
@@ -57,6 +58,7 @@ export default function Home() {
           
           {/* Right Panel - Action Hub */}
           <div className="space-y-6">
+            <TestWatchlist />
             <Chat />
           </div>
         </div>

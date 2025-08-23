@@ -1,18 +1,41 @@
 'use client';
 
-import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
+
+interface PortfolioData {
+  totalValue: number;
+  dailyChange: number;
+  dailyChangePercent: number;
+  weeklyChange: number;
+  weeklyChangePercent: number;
+  totalReturn: number;
+  totalReturnPercent: number;
+}
 
 export default function PortfolioSummary() {
-  const portfolioData = {
-    totalValue: 148500,
-    dailyChange: 1253,
-    dailyChangePercent: 0.85,
-    weeklyChange: -3200,
-    weeklyChangePercent: -2.1,
-    monthlyChange: 8500,
-    monthlyChangePercent: 6.1,
-    totalReturn: 18500,
-    totalReturnPercent: 14.2
+  const [currentTime, setCurrentTime] = useState<string>('');
+
+  // Set time on client side only to avoid hydration mismatch
+  useEffect(() => {
+    setCurrentTime(new Date().toLocaleTimeString());
+    
+    // Update time every minute
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const portfolioData: PortfolioData = {
+    totalValue: 125000,
+    dailyChange: 1250,
+    dailyChangePercent: 1.01,
+    weeklyChange: 3750,
+    weeklyChangePercent: 3.08,
+    totalReturn: 25000,
+    totalReturnPercent: 25.0,
   };
 
   const formatCurrency = (value: number) => {
@@ -107,7 +130,7 @@ export default function PortfolioSummary() {
             </span>
           </div>
           <div className="text-sm text-slate-600 dark:text-slate-400">
-            Last updated: {new Date().toLocaleTimeString()}
+            Last updated: {currentTime || 'Loading...'}
           </div>
         </div>
       </div>

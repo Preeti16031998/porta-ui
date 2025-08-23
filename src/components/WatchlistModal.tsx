@@ -1,141 +1,159 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, X, Plus, Building2 } from 'lucide-react';
-
-interface Company {
-  ticker: string;
-  name: string;
-  sector: string;
-  marketCap: string;
-}
+import { X, Plus, Loader2 } from 'lucide-react';
 
 interface WatchlistModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
 }
 
-export default function WatchlistModal({ isOpen, onClose }: WatchlistModalProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+export default function WatchlistModal({ isOpen, onClose, onSuccess }: WatchlistModalProps) {
+  const [ticker, setTicker] = useState('');
+  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const companies: Company[] = [
-    { ticker: 'SPOT', name: 'Spotify Technology S.A.', sector: 'Communication Services', marketCap: '45B' },
-    { ticker: 'SQ', name: 'Block Inc.', sector: 'Technology', marketCap: '42B' },
-    { ticker: 'SHOP', name: 'Shopify Inc.', sector: 'Technology', marketCap: '85B' },
-    { ticker: 'TWLO', name: 'Twilio Inc.', sector: 'Technology', marketCap: '12B' },
-    { ticker: 'DDOG', name: 'Datadog Inc.', sector: 'Technology', marketCap: '38B' },
-    { ticker: 'OKTA', name: 'Okta Inc.', sector: 'Technology', marketCap: '15B' },
-    { ticker: 'ZS', name: 'Zscaler Inc.', sector: 'Technology', marketCap: '28B' },
-    { ticker: 'NET', name: 'Cloudflare Inc.', sector: 'Technology', marketCap: '32B' },
-    { ticker: 'PATH', name: 'UiPath Inc.', sector: 'Technology', marketCap: '8B' },
-    { ticker: 'RBLX', name: 'Roblox Corp.', sector: 'Communication Services', marketCap: '22B' },
-  ];
+  const handleSubmit = async () => {
+    if (!ticker.trim()) return;
 
-  const filteredCompanies = companies.filter(company =>
-    company.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    setIsSubmitting(true);
+    try {
+      // Direct API call to match your exact endpoint format
+      const createData = {
+        user_id: "f00dc8bd-eabc-4143-b1f0-fbcb9715a02e",
+        ticker: ticker.trim().toUpperCase(),
+        note: notes.trim() || "",
+      };
+      
+      console.log('Sending API request:', {
+        url: 'http://localhost:8000/api/v1/watchlist/',
+        data: createData
+      });
+      
+      const response = await fetch('http://localhost:8000/api/v1/watchlist/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(createData),
+      });
 
-  const handleAddCompany = (company: Company) => {
-    setSelectedCompany(company);
-    // Here you would typically add the company to the watchlist
-    // For now, we'll just show a success message
-    setTimeout(() => {
+      console.log('API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      console.log('API Success Response:', responseData);
+
+      // Reset form and close modal
+      setTicker('');
+      setNotes('');
+      onSuccess();
+    } catch (error) {
+      console.error('Failed to add to watchlist:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to add to watchlist: ${errorMessage}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setTicker('');
+      setNotes('');
       onClose();
-      setSelectedCompany(null);
-      setSearchTerm('');
-    }, 1500);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[80vh] overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-            Add Company to Watchlist
+            Add to Watchlist
           </h2>
           <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
           >
             <X className="w-5 h-5 text-slate-500" />
           </button>
         </div>
 
-        {/* Search */}
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+        {/* Form */}
+        <div className="p-6 space-y-4">
+          {/* Ticker Input */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Ticker Symbol *
+            </label>
             <input
               type="text"
-              placeholder="Search companies by ticker or name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={ticker}
+              onChange={(e) => setTicker(e.target.value)}
+              placeholder="Enter ticker (e.g., AAPL, MSFT)"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Notes Input */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Notes (Optional)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add any notes about this stock..."
+              rows={3}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              disabled={isSubmitting}
             />
           </div>
         </div>
 
-        {/* Companies List */}
-        <div className="p-6 max-h-96 overflow-y-auto">
-          {filteredCompanies.length === 0 ? (
-            <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-              No companies found matching "{searchTerm}"
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredCompanies.map((company) => (
-                <div
-                  key={company.ticker}
-                  className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-slate-900 dark:text-white">
-                        {company.ticker}
-                      </div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">
-                        {company.name}
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-500">
-                        {company.sector} • {company.marketCap}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => handleAddCompany(company)}
-                    className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Action Buttons */}
+        <div className="p-6 flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700">
+          <button
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!ticker.trim() || isSubmitting}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                Add to Watchlist
+              </>
+            )}
+          </button>
         </div>
-
-        {/* Success Message */}
-        {selectedCompany && (
-          <div className="p-6 bg-green-50 dark:bg-green-900/20 border-t border-green-200 dark:border-green-800">
-            <div className="text-center text-green-800 dark:text-green-200">
-              <div className="font-semibold mb-2">
-                Added {selectedCompany.ticker} to your watchlist!
-              </div>
-              <div className="text-sm">
-                The company has been added successfully.
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
