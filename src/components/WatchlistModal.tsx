@@ -79,26 +79,26 @@ export default function WatchlistModal({ isOpen, onClose, onSuccess }: Watchlist
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-md">
+      <div className="bg-[#F1F3F4] rounded-xl shadow-2xl border border-[#495057]/10 w-full max-w-md">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+        <div className="flex items-center justify-between p-5 border-b border-[#495057]/10">
+          <h2 className="text-xl font-bold text-[#1B263B] tracking-tight">
             Add to Watchlist
           </h2>
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 hover:bg-[#495057]/10 rounded-lg transition-colors disabled:opacity-50"
           >
-            <X className="w-5 h-5 text-slate-500" />
+            <X className="w-5 h-5 text-[#495057]" />
           </button>
         </div>
 
         {/* Form */}
-        <div className="p-6 space-y-4">
+        <div className="p-5 space-y-4">
           {/* Ticker Input */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-[#1B263B] mb-2">
               Ticker Symbol *
             </label>
             <input
@@ -106,14 +106,14 @@ export default function WatchlistModal({ isOpen, onClose, onSuccess }: Watchlist
               value={ticker}
               onChange={(e) => setTicker(e.target.value)}
               placeholder="Enter ticker (e.g., AAPL, MSFT)"
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white border border-[#495057]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3A86FF] focus:border-transparent text-[#1B263B]"
               disabled={isSubmitting}
             />
           </div>
 
           {/* Notes Input */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-[#1B263B] mb-2">
               Notes (Optional)
             </label>
             <textarea
@@ -121,25 +121,25 @@ export default function WatchlistModal({ isOpen, onClose, onSuccess }: Watchlist
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any notes about this stock..."
               rows={3}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 bg-white border border-[#495057]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3A86FF] focus:border-transparent text-[#1B263B] resize-none"
               disabled={isSubmitting}
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="p-6 flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700">
+        <div className="p-5 flex justify-end gap-3 border-t border-[#495057]/10">
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-[#495057] hover:bg-[#495057]/10 rounded-lg transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={!ticker.trim() || isSubmitting}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1B263B] hover:bg-[#1B263B]/90 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

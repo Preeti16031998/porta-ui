@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, RefreshCw, Settings, FileText, TrendingUp, AlertCircle, Trash2 } from 'lucide-react';
+import { Send, Bot, User, RefreshCw, Settings, AlertCircle } from 'lucide-react';
 import { env } from '@/config/env';
 
 interface Message {
@@ -216,122 +216,63 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
   };
 
   return (
-    <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6 h-[600px] flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-            <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-slate-900 dark:text-white">Porta AI Assistant</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-500">Portfolio Research & Analysis</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
-            <RefreshCw className="w-4 h-4 text-slate-500" />
-          </button>
-          <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
-            <Settings className="w-4 h-4 text-slate-500" />
-          </button>
-        </div>
-      </div>
+    <div className="h-full flex flex-col bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10">
 
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <button 
-          onClick={() => setInputValue("add AMGN to my watchlist")}
-          className="px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors flex items-center gap-1"
-        >
-          <TrendingUp className="w-3 h-3" />
-          Add AMGN
-        </button>
-        <button 
-          onClick={() => setInputValue("remove AMGN from my watchlist")}
-          className="px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg text-xs hover:bg-red-200 dark:hover:bg-red-800 transition-colors flex items-center gap-1"
-        >
-          <Trash2 className="w-3 h-3" />
-          Remove AMGN
-        </button>
-        <button 
-          onClick={() => setInputValue("add 100 shares of AAPL to my portfolio at $150")}
-          className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-xs hover:bg-green-200 dark:hover:bg-green-800 transition-colors flex items-center gap-1"
-        >
-          <TrendingUp className="w-3 h-3" />
-          Add AAPL
-        </button>
-        <button 
-          onClick={() => setInputValue("remove AAPL from my portfolio")}
-          className="px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg text-xs hover:bg-red-200 dark:hover:bg-red-800 transition-colors flex items-center gap-1"
-        >
-          <Trash2 className="w-3 h-3" />
-          Sell AAPL
-        </button>
-        <button className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-xs hover:bg-green-200 dark:hover:bg-green-800 transition-colors flex items-center gap-1">
-          <FileText className="w-3 h-3" />
-          Risk Analysis
-        </button>
-        <button className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 rounded-lg text-xs hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          Market Update
-        </button>
-      </div>
+
+
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex gap-3 ${
-              message.type === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
-            {message.type === 'assistant' && (
-              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              </div>
-            )}
-            
+      <div className="flex-1 overflow-y-auto space-y-4 p-4">
+        {messages.map((message, index) => (
+          <div key={message.id}>
             <div
-              className={`max-w-[80%] p-3 rounded-lg ${
-                message.type === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
+              className={`flex gap-3 ${
+                message.type === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              <div className="text-sm leading-relaxed">{message.content}</div>
-              <div className={`text-xs mt-2 ${
-                message.type === 'user' ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'
-              }`}>
-                {formatTime(message.timestamp)}
-                {message.context && (
-                  <span className="ml-2 px-2 py-1 bg-slate-200 dark:bg-slate-600 rounded text-xs">
-                    {message.context}
-                  </span>
-                )}
+              {message.type === 'assistant' && (
+                <div className="w-10 h-10 bg-[#1B263B] rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+              )}
+              
+              <div className="max-w-[80%]">
+                <div className={`text-sm leading-relaxed font-medium ${
+                  message.type === 'user' ? 'text-[#1B263B]' : 'text-[#1B263B]'
+                }`}>
+                  {message.content}
+                </div>
+                <div className={`text-xs mt-2 ${
+                  message.type === 'user' ? 'text-[#495057]' : 'text-[#495057]'
+                }`}>
+                  {formatTime(message.timestamp)}
+                  {message.context && (
+                    <span className="ml-2 px-2 py-1 bg-white rounded-lg text-xs font-medium">
+                      {message.context}
+                    </span>
+                  )}
+                </div>
               </div>
+              
+              {message.type === 'user' && (
+                <div className="w-10 h-10 bg-[#1B263B] rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+              )}
             </div>
-            
-            {message.type === 'user' && (
-              <div className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-              </div>
-            )}
+
           </div>
         ))}
         
         {isTyping && (
           <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-              <Bot className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div className="w-10 h-10 bg-[#1B263B] rounded-full flex items-center justify-center">
+              <Bot className="w-5 h-5 text-white" />
             </div>
-            <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-[#1B263B] rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-[#1B263B] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-[#1B263B] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
             </div>
           </div>
         )}
@@ -340,22 +281,26 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
       </div>
 
       {/* Input */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Ask me anything about your portfolio..."
-          className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-        <button
-          onClick={handleSendMessage}
-          disabled={!inputValue.trim() || isTyping}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-lg transition-colors flex items-center gap-2"
-        >
-          <Send className="w-4 h-4" />
-        </button>
+      <div className="p-4 bg-[#F1F3F4]">
+        <div className="flex gap-3">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask anything..."
+              className="w-full px-4 py-3 bg-[#F8F9FA] border border-[#495057]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3A86FF] focus:border-transparent text-[#1B263B] placeholder-[#495057]/60"
+            />
+          </div>
+          <button
+            onClick={handleSendMessage}
+            disabled={!inputValue.trim() || isTyping}
+            className="p-3 bg-[#1B263B] hover:bg-[#1B263B]/90 disabled:bg-[#495057]/30 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center justify-center"
+          >
+            <Send className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
   );

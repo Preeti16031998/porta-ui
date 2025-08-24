@@ -144,23 +144,23 @@ export default function News() {
   };
 
   return (
-    <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+    <div className="bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10 p-5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+      <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#495057]/10">
+        <h2 className="text-xl font-bold text-[#1B263B] tracking-tight">
           News
         </h2>
         <div className="flex items-center gap-2">
           {/* Range Selector */}
-          <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+          <div className="flex bg-[#F8F9FA] rounded-lg p-1">
             {(['Today', '3 Days', 'Week'] as const).map((range) => (
               <button
                 key={range}
                 onClick={() => setSelectedRange(range)}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   selectedRange === range
-                    ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white text-[#1B263B] shadow-sm'
+                    : 'text-[#495057] hover:text-[#1B263B]'
                 }`}
               >
                 {range}
@@ -178,8 +178,8 @@ export default function News() {
             onClick={() => setSelectedFilter(filter)}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
               selectedFilter === filter
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                ? 'bg-[#3A86FF] text-white'
+                : 'bg-[#F8F9FA] text-[#495057] hover:bg-[#E9ECEF]'
             }`}
           >
             {filter}
@@ -190,34 +190,52 @@ export default function News() {
       {/* News List */}
       <div className="space-y-4 max-h-96 overflow-y-auto">
         {filteredNews.length === 0 ? (
-          <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-            <Newspaper className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-            <div className="text-lg font-medium mb-2">No relevant news</div>
+          <div className="text-center py-8 text-[#495057]">
+            <Newspaper className="w-12 h-12 mx-auto mb-4 text-[#495057]/30" />
+            <div className="text-lg font-medium mb-2 text-[#1B263B]">No relevant news</div>
             <div className="text-sm">No news found in this {selectedRange.toLowerCase()} range.</div>
           </div>
         ) : (
           filteredNews.map((item) => (
             <div
               key={item.id}
-              className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+              className="p-4 bg-white rounded-lg border border-[#495057]/10 hover:bg-[#F8F9FA] transition-colors"
             >
               {/* Header with Ticker and Severity */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                      {item.ticker}
-                    </span>
+                  <div className="w-8 h-8 rounded-full overflow-hidden">
+                    <img
+                      src={`https://eodhd.com/img/logos/US/${item.ticker}.png`}
+                      alt={item.ticker}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        const fallback = target.nextElementSibling as HTMLElement;
+                        if (fallback) {
+                          target.style.display = 'none';
+                          fallback.style.display = 'flex';
+                        }
+                      }}
+                    />
+                    <div 
+                      className="w-full h-full bg-[#1B263B] rounded-full flex items-center justify-center hidden"
+                      style={{ display: 'none' }}
+                    >
+                      <span className="text-sm font-bold text-white">
+                        {item.ticker}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    <span className="text-sm font-medium text-[#495057]">
                       {getSeverityLabel(item.severity)}
                     </span>
                     <div className={`w-2 h-2 rounded-full ${getSeverityColor(item.severity)}`} />
                   </div>
                 </div>
                 
-                <div className="text-right text-sm text-slate-500 dark:text-slate-500">
+                <div className="text-right text-sm text-[#495057]">
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {formatTime(item.time)}
@@ -226,7 +244,7 @@ export default function News() {
               </div>
 
               {/* Headline */}
-              <h3 className="font-semibold text-slate-900 dark:text-white mb-3 text-lg">
+              <h3 className="font-semibold text-[#1B263B] mb-3 text-lg">
                 {item.headline}
               </h3>
 
@@ -235,7 +253,7 @@ export default function News() {
                 {item.summary.map((bullet, index) => (
                   <div key={index} className="flex items-start gap-2 mb-2">
                     <div className="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 flex-shrink-0" />
-                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <span className="text-sm text-[#495057]">
                       {bullet}
                     </span>
                   </div>
@@ -243,8 +261,8 @@ export default function News() {
               </div>
 
               {/* Portfolio Impact */}
-              <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                <div className="text-xs text-blue-700 dark:text-blue-300 font-medium">
+              <div className="mb-3 p-2 bg-[#F8F9FA] rounded border border-[#495057]/20">
+                <div className="text-xs text-[#495057] font-medium">
                   Portfolio Impact: {item.portfolioImpact}
                 </div>
               </div>

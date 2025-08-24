@@ -175,112 +175,55 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
   }
 
   return (
-    <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-            Portfolio Summary
-          </h2>
-          {/* User ID Display */}
-          {userId && (
-            <div className="flex items-center gap-2 mt-1 text-sm text-slate-600 dark:text-slate-400">
-              <User className="w-4 h-4" />
-              <span className="font-mono text-xs">{userId}</span>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={fetchPortfolioSummary}
-            disabled={loading}
-            className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
-            title="Refresh Portfolio Summary"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-            <BarChart3 className="w-4 h-4" />
-            <span>Live</span>
-          </div>
-        </div>
+    <div className="bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10 p-3">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-[#1B263B] tracking-tight">
+          Portfolio Summary
+        </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Total Portfolio Value */}
-        <div className="text-center">
-          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+      {/* Side by Side Layout */}
+      <div className="flex items-start justify-between">
+        {/* Left Side - Main Portfolio Value & Daily Change */}
+        <div className="flex-1 pr-6">
+          {/* Main Portfolio Value */}
+          <div className="text-3xl font-bold text-[#1B263B] mb-3 tracking-tight">
             {formatCurrency(data.total_value)}
           </div>
-          <div className="text-sm text-slate-600 dark:text-slate-400">
-            Total Value
-          </div>
-        </div>
 
-        {/* Total Cost */}
-        <div className="text-center">
-          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-            {formatCurrency(data.total_cost)}
-          </div>
-          <div className="text-sm text-slate-600 dark:text-slate-400">
-            Total Cost
-          </div>
-        </div>
-
-        {/* Total Return */}
-        <div className="text-center">
-          <div className={`text-3xl font-bold mb-2 flex items-center justify-center gap-2 ${
-            parseFloat(data.total_return) >= 0 ? 'text-green-600' : 'text-red-600'
-          }`}>
-            {parseFloat(data.total_return) >= 0 ? (
-              <TrendingUp className="w-5 h-5" />
-            ) : (
-              <TrendingDown className="w-5 h-5" />
-            )}
-            {formatCurrency(data.total_return)}
-          </div>
-          <div className="text-sm text-slate-600 dark:text-slate-400">
-            Total Return ({formatPercent(data.total_return_percentage)})
-          </div>
-        </div>
-      </div>
-
-      {/* Additional Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-        {/* Positions Count */}
-        <div className="text-center">
-          <div className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
-            {data.total_positions}
-          </div>
-          <div className="text-sm text-slate-600 dark:text-slate-400 flex items-center justify-center gap-1">
-            <Activity className="w-3 h-3" />
-            Total Positions
-          </div>
-        </div>
-
-        {/* Profitable Positions */}
-        <div className="text-center">
-          <div className="text-lg font-semibold text-green-600 mb-1">
-            {data.profitable_positions}
-          </div>
-          <div className="text-sm text-slate-600 dark:text-slate-400 flex items-center justify-center gap-1">
-            <TrendingUp className="w-3 h-3" />
-            Profitable
-          </div>
-        </div>
-      </div>
-
-      {/* Market Status */}
-      <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full animate-pulse ${getMarketStatusColor(data.market_status)}`}></div>
-            <span className="text-sm text-slate-600 dark:text-slate-400">
-              {getMarketStatusText(data.market_status)}
+          {/* Daily Change */}
+          <div className="flex items-center gap-3 mb-2">
+            <span className={`text-lg font-bold ${
+              parseFloat(data.total_return) >= 0 ? 'text-[#2EC4B6]' : 'text-[#E63946]'
+            } tracking-tight`}>
+              {parseFloat(data.total_return) >= 0 ? '+' : ''}{formatCurrency(data.total_return)}
+            </span>
+            <span className={`text-lg font-bold ${
+              parseFloat(data.total_return_percentage) >= 0 ? 'text-[#2EC4B6]' : 'text-[#E63946]'
+            } tracking-tight`}>
+              ({formatPercent(data.total_return_percentage)})
             </span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-            <Clock className="w-3 h-3" />
-            <span>Last updated: {formatDate(data.last_updated)}</span>
+
+          {/* Today Label */}
+          <div className="text-sm text-[#495057] font-semibold tracking-wide">
+            Today
+          </div>
+        </div>
+
+        {/* Right Side - Additional Metrics */}
+        <div className="text-right pl-6">
+          {/* Total Cost */}
+          <div className="text-xs text-[#495057] font-medium mb-1 tracking-wide uppercase">Total Cost</div>
+          <div className="text-lg font-bold text-[#1B263B] mb-3 tracking-tight">
+            {formatCurrency(data.total_cost)}
+          </div>
+
+          {/* Total Positions */}
+          <div className="text-xs text-[#495057] font-medium mb-1 tracking-wide uppercase">Positions</div>
+          <div className="text-lg font-bold text-[#1B263B] tracking-tight">
+            {data.total_positions}
           </div>
         </div>
       </div>

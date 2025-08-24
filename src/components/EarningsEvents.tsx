@@ -126,28 +126,28 @@ export default function EarningsEvents() {
   const getEventTypeColor = (eventType: string) => {
     switch (eventType) {
       case 'Earnings':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+        return 'bg-[#3A86FF]/10 text-[#3A86FF]';
       case 'Dividend':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+        return 'bg-[#2EC4B6]/10 text-[#2EC4B6]';
       case 'Guidance':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+        return 'bg-[#FFD166]/10 text-[#FFD166]';
       case 'Product':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
+        return 'bg-[#1B263B]/10 text-[#1B263B]';
       default:
-        return 'bg-slate-100 text-slate-800 dark:bg-slate-900/20 dark:text-slate-400';
+        return 'bg-[#495057]/10 text-[#495057]';
     }
   };
 
   const getTimeSensitivityColor = (sensitivity: string) => {
     switch (sensitivity) {
       case 'high':
-        return 'bg-red-500';
+        return 'bg-[#E63946]';
       case 'medium':
-        return 'bg-yellow-500';
+        return 'bg-[#FFD166]';
       case 'low':
-        return 'bg-green-500';
+        return 'bg-[#2EC4B6]';
       default:
-        return 'bg-slate-500';
+        return 'bg-[#495057]';
     }
   };
 
@@ -166,31 +166,31 @@ export default function EarningsEvents() {
   }, {} as Record<string, Event[]>);
 
   return (
-    <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+    <div className="bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10 p-5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-          Earnings & Events
-        </h2>
-        <div className="flex items-center gap-2">
-          {/* Range Selector */}
-          <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-            {(['This Week', 'Next 2 Weeks', 'Month'] as const).map((range) => (
-              <button
-                key={range}
-                onClick={() => setSelectedRange(range)}
-                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  selectedRange === range
-                    ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {range}
-              </button>
-            ))}
+              <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#495057]/10">
+          <h2 className="text-xl font-bold text-[#1B263B] tracking-tight">
+            Earnings & Events
+          </h2>
+          <div className="flex items-center gap-2">
+            {/* Range Selector */}
+            <div className="flex bg-[#F8F9FA] rounded-lg p-1">
+              {(['This Week', 'Next 2 Weeks', 'Month'] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setSelectedRange(range)}
+                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                    selectedRange === range
+                      ? 'bg-white text-[#1B263B] shadow-sm'
+                      : 'text-[#495057] hover:text-[#1B263B]'
+                  }`}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Filter Pills */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -200,8 +200,8 @@ export default function EarningsEvents() {
             onClick={() => setSelectedFilter(filter)}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
               selectedFilter === filter
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                ? 'bg-[#1B263B] text-white'
+                : 'bg-[#F8F9FA] text-[#495057] hover:bg-[#E9ECEF]'
             }`}
           >
             {filter}
@@ -216,7 +216,7 @@ export default function EarningsEvents() {
             <Calendar className="w-12 h-12 mx-auto mb-4 text-slate-300" />
             <div className="text-lg font-medium mb-2">No scheduled events</div>
             <div className="text-sm">No events found in this {selectedRange.toLowerCase()} window.</div>
-            <button className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+            <button className="mt-4 px-4 py-2 bg-[#1B263B] hover:bg-[#1B263B]/90 text-white rounded-lg transition-colors">
               Change range
             </button>
           </div>
@@ -239,8 +239,8 @@ export default function EarningsEvents() {
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                            <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                          <div className="w-8 h-8 bg-[#1B263B] rounded-lg flex items-center justify-center">
+                            <span className="text-sm font-bold text-white">
                               {event.ticker}
                             </span>
                           </div>

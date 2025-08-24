@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import PortfolioSummary, { PortfolioSummaryRef } from '@/components/PortfolioSummary';
 import Holdings, { HoldingsRef } from '@/components/Holdings';
 import Watchlist, { WatchlistRef } from '@/components/Watchlist';
-import IndustryInsights from '@/components/IndustryInsights';
+
 import EarningsEvents from '@/components/EarningsEvents';
 import News from '@/components/News';
 import Chat from '@/components/Chat';
@@ -16,61 +16,47 @@ export default function Home() {
   const holdingsRef = useRef<HoldingsRef>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-[#F8F9FA] to-slate-100">
       {/* Header */}
-      <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Porta
-              </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Your Portfolio's AI Research Assistant
-              </p>
-            </div>
-            <div className="text-sm text-slate-600 dark:text-slate-400">
-              Bloomberg Terminal intelligence, reimagined for everyday investors
+      <header className="bg-[#1B263B] border-b border-[#495057]/10 sticky top-0 z-50 shadow-lg">
+        <div className="px-8" style={{ paddingTop: 'calc(var(--spacing) * 2)', paddingBottom: 'calc(var(--spacing) * 2)' }}>
+          <div className="flex items-center">
+            <div className="flex items-center">
+              <img src="/porta-text.svg" alt="Porta" className="h-12" />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Portfolio Feed */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Portfolio Summary */}
-            <PortfolioSummary ref={portfolioSummaryRef} />
-            
-            {/* Holdings and Watchlist Side by Side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Holdings ref={holdingsRef} />
-              <Watchlist ref={watchlistRef} />
-            </div>
-            
-            {/* Industry Insights */}
-            <IndustryInsights />
-            
-            {/* Earnings & Events */}
-            <EarningsEvents />
-            
-            {/* News */}
-            <News />
+      {/* Main Content - Unified Layout */}
+      <div className="flex h-[calc(100vh-88px)]">
+        {/* Left Column - Scrollable Portfolio Widgets */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+          {/* Portfolio Summary */}
+          <PortfolioSummary ref={portfolioSummaryRef} />
+          
+          {/* Holdings and Watchlist Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Holdings ref={holdingsRef} />
+            <Watchlist ref={watchlistRef} />
           </div>
           
-          {/* Right Panel - Action Hub */}
-          <div className="space-y-6">
-            <TestWatchlist />
-            <Chat 
-              onPortfolioUpdate={() => {
-                portfolioSummaryRef.current?.refresh();
-                holdingsRef.current?.refresh();
-                watchlistRef.current?.refresh();
-              }} 
-            />
-          </div>
+          {/* Earnings & Events */}
+          <EarningsEvents />
+          
+          {/* News */}
+          <News />
+        </div>
+        
+        {/* Right Column - Chat Interface */}
+        <div className="w-1/2 px-6 py-6">
+          <Chat 
+            onPortfolioUpdate={() => {
+              portfolioSummaryRef.current?.refresh();
+              holdingsRef.current?.refresh();
+              watchlistRef.current?.refresh();
+            }} 
+          />
         </div>
       </div>
     </div>
