@@ -19,6 +19,7 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const [totalPortfolioValue, setTotalPortfolioValue] = useState<number>(0);
 
   const userId = useUserId();
 
@@ -27,6 +28,28 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
     console.log('Holdings component - userId:', userId);
     console.log('Holdings component - current state:', { data, loading, error, currentPage });
   }, [userId, data, loading, error, currentPage]);
+
+  // Fetch portfolio summary to get total value for percentage calculations
+  const fetchPortfolioSummary = useCallback(async () => {
+    if (!userId) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/v1/portfolio/summary/total/${userId}`);
+      if (response.ok) {
+        const summaryData = await response.json();
+        setTotalPortfolioValue(parseFloat(summaryData.total_value));
+      } else if (response.status === 404) {
+        // Handle 404 gracefully - portfolio doesn't exist yet, which is fine
+        console.log('No existing portfolio found for user, starting with defaults');
+        setTotalPortfolioValue(0);
+      } else {
+        // Only log errors for non-404 status codes
+        console.error('Failed to fetch portfolio summary:', response.status, response.statusText);
+      }
+    } catch (err) {
+      console.error('Network error fetching portfolio summary:', err);
+    }
+  }, [userId]);
 
   // Stable API call function
   const fetchHoldings = useCallback(async () => {
@@ -70,9 +93,10 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
   // Fetch data when component mounts or userId/currentPage changes
   useEffect(() => {
     if (userId) {
+      fetchPortfolioSummary();
       fetchHoldings();
     }
-  }, [userId, currentPage, fetchHoldings]);
+  }, [userId, currentPage, fetchHoldings, fetchPortfolioSummary]);
 
   const handlePageChange = useCallback((newPage: number) => {
     setCurrentPage(newPage);
@@ -127,6 +151,45 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 4,
     }).format(num);
+  }, []);
+
+  // Calculate portfolio percentage for a holding
+  const calculatePortfolioPercentage = useCallback((item: PortfolioItem) => {
+    if (totalPortfolioValue === 0) return 0;
+    
+    // Calculate current value: quantity * current_price (or buy_price as fallback)
+    const quantity = parseFloat(item.quantity);
+    const currentPrice = parseFloat(item.current_price || item.buy_price);
+    const currentValue = quantity * currentPrice;
+    
+    return (currentValue / totalPortfolioValue) * 100;
+  }, [totalPortfolioValue]);
+
+  // Get company name from ticker
+  const getCompanyName = useCallback((ticker: string) => {
+    const companyNames: { [key: string]: string } = {
+      'AAPL': 'Apple Inc.',
+      'NVDA': 'NVIDIA Corp.',
+      'JPM': 'JPMorgan Chase',
+      'MSFT': 'Microsoft Corp.',
+      'GOOGL': 'Alphabet Inc.',
+      'TSLA': 'Tesla Inc.',
+      'AMZN': 'Amazon.com Inc.',
+      'META': 'Meta Platforms Inc.',
+      'BRK.A': 'Berkshire Hathaway Inc.',
+      'UNH': 'UnitedHealth Group Inc.'
+    };
+    return companyNames[ticker] || ticker;
+  }, []);
+
+  // Calculate total value for a holding
+  const calculateTotalValue = useCallback((item: PortfolioItem) => {
+    if (item.current_value) return parseFloat(item.current_value);
+    
+    // Fallback calculation if current_value not provided
+    const quantity = parseFloat(item.quantity);
+    const currentPrice = parseFloat(item.current_price || item.buy_price);
+    return quantity * currentPrice;
   }, []);
 
   // Memoized computed values
@@ -225,31 +288,29 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
                     </div>
                     <div>
                       <div className="font-semibold text-[#1B263B]">
-                        {item.ticker === 'AAPL' ? 'Apple Inc.' : 
-                         item.ticker === 'NVDA' ? 'NVIDIA Corp.' : 
-                         item.ticker === 'JPM' ? 'JPMorgan Chase' : 
-                         item.ticker}
+                        {getCompanyName(item.ticker)}
                       </div>
                       <div className="text-xs text-[#495057]">
-                        {item.ticker === 'AAPL' ? '25.3% of portfolio' : 
-                         item.ticker === 'NVDA' ? '18.7% of portfolio' : 
-                         '15.2% of portfolio'}
+                        {totalPortfolioValue > 0 ? `${calculatePortfolioPercentage(item).toFixed(1)}% of portfolio` : 'Calculating...'}
                       </div>
                     </div>
                   </div>
                   
                   <div className="text-right">
                     <div className="font-semibold text-[#1B263B]">
-                      {item.ticker === 'AAPL' ? '$175.43' : 
-                       item.ticker === 'NVDA' ? '$892.15' : 
-                       '$158.92'}
+                      {formatCurrency(calculateTotalValue(item))}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <div className={`w-2 h-2 rounded-full ${
-                        item.ticker === 'AAPL' ? 'bg-[#E63946]' : 
-                        item.ticker === 'NVDA' ? 'bg-[#2EC4B6]' : 
-                        'bg-[#FFD166]'
-                      }`}></div>
+                    <div className="text-xs text-[#495057] mb-1">
+                      {parseInt(item.quantity)} shares
+                    </div>
+                    <div className="text-xs text-[#495057]">
+                      {item.unrealized_pnl ? (
+                        <span className={parseFloat(item.unrealized_pnl) >= 0 ? 'text-[#2EC4B6]' : 'text-[#E63946]'}>
+                          {parseFloat(item.unrealized_pnl) >= 0 ? '+' : ''}{formatCurrency(item.unrealized_pnl)}
+                        </span>
+                      ) : (
+                        'No P&L data'
+                      )}
                     </div>
                   </div>
                   

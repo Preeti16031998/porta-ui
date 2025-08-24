@@ -59,14 +59,18 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
       
       console.log('Portfolio summary API response status:', response.status);
       
-      if (!response.ok) {
+      if (response.ok) {
+        const summaryData: PortfolioSummaryData = await response.json();
+        console.log('Portfolio summary data:', summaryData);
+        setData(summaryData);
+      } else if (response.status === 404) {
+        // Handle 404 gracefully - portfolio doesn't exist yet, which is fine
+        console.log('No existing portfolio found for user, starting with defaults');
+        // Keep the default data that's already set in state
+      } else {
+        // Only throw errors for non-404 status codes
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
-      const summaryData: PortfolioSummaryData = await response.json();
-      console.log('Portfolio summary data:', summaryData);
-      
-      setData(summaryData);
     } catch (err) {
       console.error('Portfolio summary fetch error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');

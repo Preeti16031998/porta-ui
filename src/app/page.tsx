@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Settings } from 'lucide-react';
 import PortfolioSummary, { PortfolioSummaryRef } from '@/components/PortfolioSummary';
 import Holdings, { HoldingsRef } from '@/components/Holdings';
 import Watchlist, { WatchlistRef } from '@/components/Watchlist';
@@ -9,21 +10,30 @@ import EarningsEvents from '@/components/EarningsEvents';
 import News from '@/components/News';
 import Chat from '@/components/Chat';
 import TestWatchlist from '@/components/TestWatchlist';
+import UserPreferencesModal from '@/components/UserPreferencesModal';
 
 export default function Home() {
   const portfolioSummaryRef = useRef<PortfolioSummaryRef>(null);
   const watchlistRef = useRef<WatchlistRef>(null);
   const holdingsRef = useRef<HoldingsRef>(null);
+  const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F8F9FA] to-slate-100">
       {/* Header */}
       <header className="bg-[#1B263B] border-b border-[#495057]/10 sticky top-0 z-50 shadow-lg">
         <div className="px-8" style={{ paddingTop: 'calc(var(--spacing) * 2)', paddingBottom: 'calc(var(--spacing) * 2)' }}>
-          <div className="flex items-center">
+          <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img src="/porta-text.svg" alt="Porta" className="h-12" />
             </div>
+            <button
+              onClick={() => setIsPreferencesModalOpen(true)}
+              className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              title="User Preferences"
+            >
+              <Settings className="w-6 h-6" />
+            </button>
           </div>
         </div>
       </header>
@@ -41,11 +51,11 @@ export default function Home() {
             <Watchlist ref={watchlistRef} />
           </div>
           
-          {/* Earnings & Events */}
-          <EarningsEvents />
-          
           {/* News */}
           <News />
+          
+          {/* Earnings & Events */}
+          <EarningsEvents />
         </div>
         
         {/* Right Column - Chat Interface */}
@@ -59,6 +69,12 @@ export default function Home() {
           />
         </div>
       </div>
+
+      {/* User Preferences Modal */}
+      <UserPreferencesModal 
+        isOpen={isPreferencesModalOpen} 
+        onClose={() => setIsPreferencesModalOpen(false)} 
+      />
     </div>
   );
 }
