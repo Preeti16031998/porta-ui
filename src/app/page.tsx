@@ -19,20 +19,20 @@ export default function Home() {
   const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8F9FA] to-slate-100">
+    <div className="min-h-screen bg-[#F7F7F7]">
       {/* Header */}
-      <header className="bg-[#1B263B] border-b border-[#495057]/10 sticky top-0 z-50 shadow-lg">
+      <header className="bg-[#F7F7F7] sticky top-0 z-50 py-1">
         <div className="px-8" style={{ paddingTop: 'calc(var(--spacing) * 2)', paddingBottom: 'calc(var(--spacing) * 2)' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <img src="/porta-text.svg" alt="Porta" className="h-12" />
+              <img src="/porta-text.svg" alt="Porta" className="h-14 porta-logo-navy" />
             </div>
             <button
               onClick={() => setIsPreferencesModalOpen(true)}
-              className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              className="px-4 py-2 bg-[#1B263B] text-white hover:bg-[#1B263B]/90 rounded-full transition-colors font-medium"
               title="User Preferences"
             >
-              <Settings className="w-6 h-6" />
+              Manage Preferences
             </button>
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function Home() {
       {/* Main Content - Unified Layout */}
       <div className="flex h-[calc(100vh-88px)]">
         {/* Left Column - Scrollable Portfolio Widgets */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scrollbar-hide">
           {/* Portfolio Summary */}
           <PortfolioSummary ref={portfolioSummaryRef} />
           
@@ -59,7 +59,7 @@ export default function Home() {
         </div>
         
         {/* Right Column - Chat Interface */}
-        <div className="w-1/2 px-6 py-6">
+        <div className="w-[45%] px-6 py-6">
           <Chat 
             onPortfolioUpdate={() => {
               portfolioSummaryRef.current?.refresh();

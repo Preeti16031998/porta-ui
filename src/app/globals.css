@@ -24,3 +24,19 @@ body {
   color: var(--foreground);
   font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+
+/* Hide scrollbar for webkit browsers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Make Porta logo navy blue */
+.porta-logo-navy {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(1000%) hue-rotate(200deg) brightness(20%) contrast(100%);
+}

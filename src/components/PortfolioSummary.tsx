@@ -148,7 +148,7 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
 
   if (loading && !data) {
     return (
-      <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+      <div className="bg-[#FCFCFC] backdrop-blur-sm rounded-3xl shadow-lg border border-slate-300/50 p-6">
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading portfolio summary...</p>
@@ -159,7 +159,7 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
 
   if (error && !data) {
     return (
-      <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+      <div className="bg-[#FCFCFC] backdrop-blur-sm rounded-3xl shadow-lg border border-slate-300/50 p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <h3 className="text-red-800 font-medium">Error Loading Portfolio Summary</h3>
           <p className="text-red-600 text-sm mt-1">{error}</p>
@@ -179,7 +179,7 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
   }
 
   return (
-    <div className="bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10 p-3">
+    <div className="bg-[#FCFCFC] rounded-3xl shadow-lg border border-slate-300/50 p-6">
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-lg font-bold text-[#1B263B] tracking-tight">
@@ -192,18 +192,18 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
         {/* Left Side - Main Portfolio Value & Daily Change */}
         <div className="flex-1 pr-6">
           {/* Main Portfolio Value */}
-          <div className="text-3xl font-bold text-[#1B263B] mb-3 tracking-tight">
+          <div className="text-2xl font-semibold text-[#1B263B] mb-3 tracking-tight">
             {formatCurrency(data.total_value)}
           </div>
 
           {/* Daily Change */}
           <div className="flex items-center gap-3 mb-2">
-            <span className={`text-lg font-bold ${
+            <span className={`text-base font-semibold ${
               parseFloat(data.total_return) >= 0 ? 'text-[#2EC4B6]' : 'text-[#E63946]'
             } tracking-tight`}>
               {parseFloat(data.total_return) >= 0 ? '+' : ''}{formatCurrency(data.total_return)}
             </span>
-            <span className={`text-lg font-bold ${
+            <span className={`text-base font-semibold ${
               parseFloat(data.total_return_percentage) >= 0 ? 'text-[#2EC4B6]' : 'text-[#E63946]'
             } tracking-tight`}>
               ({formatPercent(data.total_return_percentage)})
@@ -220,13 +220,13 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
         <div className="text-right pl-6">
           {/* Total Cost */}
           <div className="text-xs text-[#495057] font-medium mb-1 tracking-wide uppercase">Total Cost</div>
-          <div className="text-lg font-bold text-[#1B263B] mb-3 tracking-tight">
+          <div className="text-base font-semibold text-[#1B263B] mb-3 tracking-tight">
             {formatCurrency(data.total_cost)}
           </div>
 
           {/* Total Positions */}
           <div className="text-xs text-[#495057] font-medium mb-1 tracking-wide uppercase">Positions</div>
-          <div className="text-lg font-bold text-[#1B263B] tracking-tight">
+          <div className="text-base font-semibold text-[#1B263B] tracking-tight">
             {data.total_positions}
           </div>
         </div>

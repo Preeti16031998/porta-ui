@@ -144,12 +144,12 @@ export default function News() {
   };
 
   return (
-    <div className="bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10 p-5">
+          <div className="bg-[#FCFCFC] rounded-3xl shadow-lg border border-slate-300/50 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#495057]/10">
-        <h2 className="text-xl font-bold text-[#1B263B] tracking-tight">
-          News
-        </h2>
+                              <div className="flex items-center justify-between mb-6">
+                                                 <h2 className="text-xl font-bold text-[#1B263B] tracking-tight">
+                   News
+                 </h2>
         <div className="flex items-center gap-2">
           {/* Range Selector */}
           <div className="flex bg-[#F8F9FA] rounded-lg p-1">
@@ -199,7 +199,7 @@ export default function News() {
           filteredNews.map((item) => (
             <div
               key={item.id}
-              className="p-4 bg-white rounded-lg border border-[#495057]/10 hover:bg-[#F8F9FA] transition-colors"
+              className="p-4 bg-[#FCFCFC] rounded-lg hover:bg-slate-100 transition-colors"
             >
               {/* Header with Ticker and Severity */}
               <div className="flex items-start justify-between mb-3">

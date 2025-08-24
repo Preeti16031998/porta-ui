@@ -79,9 +79,9 @@ export default function WatchlistModal({ isOpen, onClose, onSuccess }: Watchlist
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#F1F3F4] rounded-xl shadow-2xl border border-[#495057]/10 w-full max-w-md">
+      <div className="bg-[#FCFCFC] rounded-3xl shadow-lg border border-slate-300/50 w-full max-w-md">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[#495057]/10">
+        <div className="flex items-center justify-between p-5 border-b border-slate-300/50">
           <h2 className="text-xl font-bold text-[#1B263B] tracking-tight">
             Add to Watchlist
           </h2>

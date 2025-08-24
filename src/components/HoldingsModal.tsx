@@ -107,17 +107,17 @@ export default function HoldingsModal({ isOpen, onClose, onSuccess, editItem }: 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#F1F3F4] rounded-xl shadow-2xl border border-[#495057]/10 max-w-md w-full mx-4">
+      <div className="bg-[#FCFCFC] rounded-3xl shadow-lg border border-slate-300/50 max-w-md w-full mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[#495057]/10">
+        <div className="flex items-center justify-between p-5 border-b border-slate-300/50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-[#1B263B]/10 rounded-lg flex items-center justify-center">
               {editItem ? <Edit className="w-4 h-4 text-[#1B263B]" /> : <Plus className="w-4 h-4 text-[#1B263B]" />}
             </div>
             <div>
-              <h3 className="text-xl font-bold text-[#1B263B] tracking-tight">
-                {editItem ? 'Edit Holding' : 'Add New Holding'}
-              </h3>
+                                                     <h3 className="text-xl font-bold text-[#1B263B] tracking-tight">
+               {editItem ? 'Edit Holding' : 'Add New Holding'}
+             </h3>
               <p className="text-sm text-[#495057]">
                 {editItem ? 'Update your portfolio position' : 'Add a new stock to your portfolio'}
               </p>

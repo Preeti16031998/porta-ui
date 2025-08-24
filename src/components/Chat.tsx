@@ -216,7 +216,7 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
   };
 
   return (
-    <div className="h-full flex flex-col bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10">
+          <div className="h-[630px] flex flex-col bg-[#FCFCFC] rounded-3xl shadow-lg border border-slate-300/50">
 
 
 
@@ -281,7 +281,7 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
       </div>
 
       {/* Input */}
-      <div className="p-4 bg-[#F1F3F4]">
+              <div className="p-4 bg-[#FCFCFC] rounded-b-3xl">
         <div className="flex gap-3">
           <div className="flex-1 relative">
             <input
@@ -290,13 +290,13 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask anything..."
-              className="w-full px-4 py-3 bg-[#F8F9FA] border border-[#495057]/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3A86FF] focus:border-transparent text-[#1B263B] placeholder-[#495057]/60"
+              className="w-full px-4 py-3 bg-[#F8F9FA] border border-[#495057]/20 rounded-full focus:outline-none focus:ring-2 focus:ring-[#3A86FF] focus:border-transparent text-[#1B263B] placeholder-[#495057]/60"
             />
           </div>
           <button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isTyping}
-            className="p-3 bg-[#1B263B] hover:bg-[#1B263B]/90 disabled:bg-[#495057]/30 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center justify-center"
+            className="p-3 bg-[#1B263B] hover:bg-[#1B263B]/90 disabled:bg-[#495057]/30 disabled:cursor-not-allowed text-white rounded-full transition-colors flex items-center justify-center"
           >
             <Send className="w-5 h-5" />
           </button>

@@ -209,7 +209,7 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
 
   return (
     <>
-      <div className="bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10 p-3 transition-shadow duration-300 hover:shadow-xl">
+      <div className="bg-[#FCFCFC] rounded-3xl shadow-lg border border-slate-300/50 p-6 transition-shadow duration-300 hover:shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-bold text-[#1B263B] tracking-tight">
@@ -266,7 +266,7 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
               {filteredItems.map((item: PortfolioItem) => (
                 <div
                   key={item.portfolio_id}
-                  className="flex items-center justify-between p-2 bg-[#E9ECEF] rounded-lg border border-[#495057]/10 hover:bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm"
+                  className="flex items-start justify-between p-2 bg-[#FCFCFC] rounded-lg hover:bg-slate-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-white/50">
@@ -296,7 +296,7 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
                     </div>
                   </div>
                   
-                  <div className="text-right">
+                  <div className="text-right min-w-[120px]">
                     <div className="font-semibold text-[#1B263B]">
                       {formatCurrency(calculateTotalValue(item))}
                     </div>
@@ -305,7 +305,7 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
                     </div>
                     <div className="text-xs text-[#495057]">
                       {item.unrealized_pnl ? (
-                        <span className={parseFloat(item.unrealized_pnl) >= 0 ? 'text-[#2EC4B6]' : 'text-[#E63946]'}>
+                        <span className={`${parseFloat(item.unrealized_pnl) >= 0 ? 'text-[#2EC4B6]' : 'text-[#E63946]'} font-medium`}>
                           {parseFloat(item.unrealized_pnl) >= 0 ? '+' : ''}{formatCurrency(item.unrealized_pnl)}
                         </span>
                       ) : (

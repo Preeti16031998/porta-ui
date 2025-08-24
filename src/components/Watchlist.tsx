@@ -117,7 +117,7 @@ const Watchlist = forwardRef<WatchlistRef>((props, ref) => {
 
   return (
     <>
-      <div className="bg-[#F1F3F4] rounded-xl shadow-lg border border-[#495057]/10 p-3 transition-shadow duration-300 hover:shadow-xl">
+      <div className="bg-[#FCFCFC] rounded-3xl shadow-lg border border-slate-300/50 p-6 transition-shadow duration-300 hover:shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-bold text-[#1B263B] tracking-tight">
@@ -174,7 +174,7 @@ const Watchlist = forwardRef<WatchlistRef>((props, ref) => {
               {filteredItems.map((item: WatchlistItem) => (
                 <div
                   key={item.watchlist_id}
-                  className="flex items-center justify-between p-2 bg-[#E9ECEF] rounded-lg border border-[#495057]/10 hover:bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm"
+                  className="flex items-center justify-between p-2 bg-[#FCFCFC] rounded-lg hover:bg-slate-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-white/50">
