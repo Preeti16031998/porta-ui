@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import PortfolioSummary from '@/components/PortfolioSummary';
-import Holdings from '@/components/Holdings';
-import Watchlist from '@/components/Watchlist';
+import { useState, useEffect, useRef } from 'react';
+import PortfolioSummary, { PortfolioSummaryRef } from '@/components/PortfolioSummary';
+import Holdings, { HoldingsRef } from '@/components/Holdings';
+import Watchlist, { WatchlistRef } from '@/components/Watchlist';
 import IndustryInsights from '@/components/IndustryInsights';
 import EarningsEvents from '@/components/EarningsEvents';
 import News from '@/components/News';
@@ -11,6 +11,10 @@ import Chat from '@/components/Chat';
 import TestWatchlist from '@/components/TestWatchlist';
 
 export default function Home() {
+  const portfolioSummaryRef = useRef<PortfolioSummaryRef>(null);
+  const watchlistRef = useRef<WatchlistRef>(null);
+  const holdingsRef = useRef<HoldingsRef>(null);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
@@ -38,12 +42,12 @@ export default function Home() {
           {/* Left Panel - Portfolio Feed */}
           <div className="lg:col-span-2 space-y-6">
             {/* Portfolio Summary */}
-            <PortfolioSummary />
+            <PortfolioSummary ref={portfolioSummaryRef} />
             
             {/* Holdings and Watchlist Side by Side */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Holdings />
-              <Watchlist />
+              <Holdings ref={holdingsRef} />
+              <Watchlist ref={watchlistRef} />
             </div>
             
             {/* Industry Insights */}
@@ -59,7 +63,13 @@ export default function Home() {
           {/* Right Panel - Action Hub */}
           <div className="space-y-6">
             <TestWatchlist />
-            <Chat />
+            <Chat 
+              onPortfolioUpdate={() => {
+                portfolioSummaryRef.current?.refresh();
+                holdingsRef.current?.refresh();
+                watchlistRef.current?.refresh();
+              }} 
+            />
           </div>
         </div>
       </div>

@@ -76,33 +76,7 @@ export interface WatchlistListResponse {
   pages: number;
 }
 
-// Portfolio API service
-export class PortfolioService {
-  // Get portfolio summary
-  static async getPortfolioSummary(): Promise<ApiResponse<PortfolioData>> {
-    return apiClient.get<PortfolioData>('/api/portfolio/summary');
-  }
 
-  // Get portfolio holdings
-  static async getHoldings(): Promise<ApiResponse<Holding[]>> {
-    return apiClient.get<Holding[]>('/api/portfolio/holdings');
-  }
-
-  // Get watchlist
-  static async getWatchlist(): Promise<ApiResponse<Holding[]>> {
-    return apiClient.get<Holding[]>('/api/watchlist');
-  }
-
-  // Add to watchlist
-  static async addToWatchlist(symbol: string): Promise<ApiResponse<{ success: boolean }>> {
-    return apiClient.post<{ success: boolean }>('/api/watchlist', { symbol });
-  }
-
-  // Remove from watchlist
-  static async removeFromWatchlist(symbol: string): Promise<ApiResponse<{ success: boolean }>> {
-    return apiClient.delete<{ success: boolean }>(`/api/watchlist/${symbol}`);
-  }
-}
 
 // News API service
 export class NewsService {
@@ -187,6 +161,106 @@ export class WatchlistService {
       return {
         ...response,
         data: response.data.watchlists,
+      };
+    }
+    return response as any;
+  }
+}
+
+// Portfolio API service - updated to match your API format
+export interface PortfolioItem {
+  portfolio_id: string;
+  user_id: string;
+  ticker: string;
+  quantity: string;
+  buy_price: string;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+  delete_nbr: number;
+  current_price?: string;
+  total_cost?: string;
+  current_value?: string;
+  unrealized_pnl?: string;
+  pnl_percentage?: string;
+  is_profitable?: boolean;
+}
+
+export interface CreatePortfolioRequest {
+  user_id: string;
+  ticker: string;
+  quantity: string;
+  buy_price: string;
+  note?: string;
+}
+
+export interface UpdatePortfolioRequest {
+  quantity?: string;
+  buy_price?: string;
+  note?: string;
+}
+
+export interface PortfolioFilters {
+  user_id?: string;
+  ticker?: string;
+  page?: number;
+  size?: number;
+  include_pnl?: boolean;
+}
+
+export interface PortfolioListResponse {
+  portfolios: PortfolioItem[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+export class PortfolioService {
+  // Get all portfolio holdings with pagination and filters
+  static async getPortfolios(filters: PortfolioFilters): Promise<ApiResponse<PortfolioListResponse>> {
+    const params = new URLSearchParams();
+    
+    if (filters.user_id) params.append('user_id', filters.user_id);
+    if (filters.ticker) params.append('ticker', filters.ticker);
+    if (filters.page) params.append('page', filters.page.toString());
+    if (filters.size) params.append('size', filters.size.toString());
+    if (filters.include_pnl) params.append('include_pnl', filters.include_pnl.toString());
+    
+    const queryString = params.toString();
+    const endpoint = `/api/v1/portfolio${queryString ? `?${queryString}` : ''}`;
+    
+    return apiClient.get<PortfolioListResponse>(endpoint);
+  }
+
+  // Get portfolio by ID
+  static async getPortfolioById(id: string): Promise<ApiResponse<PortfolioItem>> {
+    return apiClient.get<PortfolioItem>(`/api/v1/portfolio/${id}`);
+  }
+
+  // Create new portfolio entry
+  static async createPortfolio(data: CreatePortfolioRequest): Promise<ApiResponse<PortfolioItem>> {
+    return apiClient.post<PortfolioItem>('/api/v1/portfolio/', data);
+  }
+
+  // Update portfolio entry
+  static async updatePortfolio(id: string, data: UpdatePortfolioRequest): Promise<ApiResponse<PortfolioItem>> {
+    return apiClient.put<PortfolioItem>(`/api/v1/portfolio/${id}`, data);
+  }
+
+  // Delete portfolio entry
+  static async deletePortfolio(id: string): Promise<ApiResponse<{ message: string; portfolio_id: string; deleted_at: string }>> {
+    return apiClient.delete<{ message: string; portfolio_id: string; deleted_at: string }>(`/api/v1/portfolio/${id}`);
+  }
+
+  // Legacy method for backward compatibility
+  static async getHoldings(): Promise<ApiResponse<PortfolioItem[]>> {
+    const userId = getCurrentUserId();
+    const response = await this.getPortfolios({ user_id: userId, include_pnl: true });
+    if (response.success) {
+      return {
+        ...response,
+        data: response.data.portfolios,
       };
     }
     return response as any;

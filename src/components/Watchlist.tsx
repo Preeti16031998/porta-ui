@@ -1,12 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Plus, Eye, Trash2, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo, useImperativeHandle, forwardRef } from 'react';
+import { Search, Plus, Eye, Trash2, ChevronLeft, ChevronRight, User, RefreshCw } from 'lucide-react';
 import WatchlistModal from './WatchlistModal';
 import { useUserId } from '@/hooks/useUser';
 import { WatchlistService, WatchlistItem } from '@/services/api';
 
-export default function Watchlist() {
+export interface WatchlistRef {
+  refresh: () => Promise<void>;
+}
+
+const Watchlist = forwardRef<WatchlistRef>((props, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState<any>(null);
@@ -55,6 +59,11 @@ export default function Watchlist() {
       setLoading(false);
     }
   }, [userId, currentPage]);
+
+  // Expose refresh function to parent components
+  useImperativeHandle(ref, () => ({
+    refresh: fetchWatchlist
+  }), [fetchWatchlist]);
 
   // Fetch data when component mounts or userId/currentPage changes
   useEffect(() => {
@@ -122,13 +131,23 @@ export default function Watchlist() {
               </div>
             )}
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchWatchlist}
+              disabled={loading}
+              className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+              title="Refresh Watchlist"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add
+            </button>
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -249,4 +268,6 @@ export default function Watchlist() {
       />
     </>
   );
-}
+});
+
+export default Watchlist;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, RefreshCw, Settings, FileText, TrendingUp, AlertCircle } from 'lucide-react';
+import { Send, Bot, User, RefreshCw, Settings, FileText, TrendingUp, AlertCircle, Trash2 } from 'lucide-react';
 import { env } from '@/config/env';
 
 interface Message {
@@ -19,7 +19,11 @@ interface ChatApiResponse {
   status: string;
 }
 
-export default function Chat() {
+interface ChatProps {
+  onPortfolioUpdate?: () => void;
+}
+
+export default function Chat({ onPortfolioUpdate }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -99,48 +103,13 @@ export default function Chat() {
             console.log('Chat - Raw response string:', data.response);
             
             try {
-              // First, try to parse as JSON directly (handles escaped quotes)
+              // Try to parse as JSON directly
               responseList = JSON.parse(data.response);
               console.log('Chat - Successfully parsed as JSON:', responseList);
             } catch (parseError) {
-              console.log('Chat - Failed to parse as JSON, trying to clean and parse');
-              
-              try {
-                // Clean up the response string for parsing
-                let cleanedResponse = data.response;
-                
-                // Handle the specific format: "[{'text': \"...\", 'type': 'text', 'index': 0}]"
-                // Replace escaped quotes and single quotes
-                cleanedResponse = cleanedResponse
-                  .replace(/\\"/g, '"')  // Replace \" with "
-                  .replace(/'/g, '"')    // Replace ' with "
-                  .replace(/True/g, 'true')
-                  .replace(/False/g, 'false');
-                
-                console.log('Chat - Cleaned response:', cleanedResponse);
-                
-                responseList = JSON.parse(cleanedResponse);
-                console.log('Chat - Successfully parsed cleaned response:', responseList);
-              } catch (secondParseError) {
-                console.log('Chat - Failed to parse cleaned response, using regex fallback');
-                
-                // Fallback: Extract text using regex
-                const textMatch = data.response.match(/"text":\s*"([^"]*)"/);
-                if (textMatch && textMatch[1]) {
-                  responseText = textMatch[1];
-                  console.log('Chat - Extracted text using regex:', responseText);
-                } else {
-                  // Last resort: clean up the raw response
-                  responseText = data.response
-                    .replace(/[\[\]{}'"]/g, '')
-                    .replace(/text:\s*/, '')
-                    .replace(/type:\s*\w+/, '')
-                    .replace(/index:\s*\d+/, '')
-                    .trim();
-                  console.log('Chat - Using cleaned raw response:', responseText);
-                }
-                responseList = null;
-              }
+              console.log('Chat - Failed to parse as JSON, using raw response');
+              responseText = data.response;
+              responseList = null;
             }
           } else {
             // If it's an object, try to extract text directly
@@ -162,6 +131,33 @@ export default function Chat() {
         }
 
         console.log('Chat - Final parsed responseText:', responseText);
+
+        // Check if this response indicates a portfolio or watchlist update
+        const isPortfolioUpdate = (
+          // Portfolio operations
+          (responseText.toLowerCase().includes('added') || 
+           responseText.toLowerCase().includes('removed') ||
+           responseText.toLowerCase().includes('successfully removed') ||
+           responseText.toLowerCase().includes('updated') ||
+           responseText.toLowerCase().includes('deleted') ||
+           responseText.toLowerCase().includes('sold') ||
+           responseText.toLowerCase().includes('bought') ||
+           responseText.toLowerCase().includes('purchased')) && 
+          (responseText.toLowerCase().includes('watchlist') || 
+           responseText.toLowerCase().includes('portfolio') ||
+           responseText.toLowerCase().includes('position') ||
+           responseText.toLowerCase().includes('holding') ||
+           responseText.toLowerCase().includes('shares') ||
+           responseText.toLowerCase().includes('stock'))
+        );
+
+        if (isPortfolioUpdate && onPortfolioUpdate) {
+          console.log('Chat - Detected portfolio/watchlist update, refreshing all components');
+          // Small delay to ensure the API call completes
+          setTimeout(() => {
+            onPortfolioUpdate();
+          }, 500);
+        }
 
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -249,7 +245,28 @@ export default function Chat() {
           className="px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors flex items-center gap-1"
         >
           <TrendingUp className="w-3 h-3" />
-          Test AMGN Watchlist
+          Add AMGN
+        </button>
+        <button 
+          onClick={() => setInputValue("remove AMGN from my watchlist")}
+          className="px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg text-xs hover:bg-red-200 dark:hover:bg-red-800 transition-colors flex items-center gap-1"
+        >
+          <Trash2 className="w-3 h-3" />
+          Remove AMGN
+        </button>
+        <button 
+          onClick={() => setInputValue("add 100 shares of AAPL to my portfolio at $150")}
+          className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-xs hover:bg-green-200 dark:hover:bg-green-800 transition-colors flex items-center gap-1"
+        >
+          <TrendingUp className="w-3 h-3" />
+          Add AAPL
+        </button>
+        <button 
+          onClick={() => setInputValue("remove AAPL from my portfolio")}
+          className="px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg text-xs hover:bg-red-200 dark:hover:bg-red-800 transition-colors flex items-center gap-1"
+        >
+          <Trash2 className="w-3 h-3" />
+          Sell AAPL
         </button>
         <button className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-xs hover:bg-green-200 dark:hover:bg-green-800 transition-colors flex items-center gap-1">
           <FileText className="w-3 h-3" />
