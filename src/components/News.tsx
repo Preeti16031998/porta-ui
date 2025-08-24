@@ -127,10 +127,10 @@ const News = forwardRef<NewsRef, NewsProps>(({ onSendMessage }, ref) => {
       params.append('page', filters.page.toString());
       params.append('size', filters.size.toString());
       
-      // Filter by portfolio tickers
-      tickers.forEach(ticker => {
-        params.append('ticker', ticker);
-      });
+      // Filter by portfolio tickers - send all tickers in a single parameter
+      if (tickers.length > 0) {
+        params.append('ticker', tickers.join(','));
+      }
       
       const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/v1/news/?${params.toString()}`;
       
@@ -179,10 +179,10 @@ const News = forwardRef<NewsRef, NewsProps>(({ onSendMessage }, ref) => {
       params.append('page', '1');
       params.append('size', '10');
       
-      // Filter by portfolio tickers
-      tickers.forEach(ticker => {
-        params.append('ticker', ticker);
-      });
+      // Filter by portfolio tickers - send all tickers in a single parameter
+      if (tickers.length > 0) {
+        params.append('ticker', tickers.join(','));
+      }
       
       const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/v1/news/?${params.toString()}`;
       
