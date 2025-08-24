@@ -10,7 +10,11 @@ export interface HoldingsRef {
   refresh: () => Promise<void>;
 }
 
-const Holdings = forwardRef<HoldingsRef>((props, ref) => {
+interface HoldingsProps {
+  onPortfolioUpdate?: () => void;
+}
+
+const Holdings = forwardRef<HoldingsRef, HoldingsProps>(({ onPortfolioUpdate }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<PortfolioItem | null>(null);
@@ -23,21 +27,25 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
 
   const userId = useUserId();
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Holdings component - userId:', userId);
-    console.log('Holdings component - current state:', { data, loading, error, currentPage });
-  }, [userId, data, loading, error, currentPage]);
+
 
   // Fetch portfolio summary to get total value for percentage calculations
   const fetchPortfolioSummary = useCallback(async () => {
     if (!userId) return;
     
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/portfolio/summary/total/${userId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/v1/portfolio/?user_id=${userId}&include_pnl=true`);
       if (response.ok) {
-        const summaryData = await response.json();
-        setTotalPortfolioValue(parseFloat(summaryData.total_value));
+        const portfolioData = await response.json();
+        if (portfolioData.portfolios && portfolioData.portfolios.length > 0) {
+          // Calculate total portfolio value from holdings
+          const totalValue = portfolioData.portfolios.reduce((sum: number, item: any) => {
+            return sum + (parseFloat(item.current_value || '0') || 0);
+          }, 0);
+          setTotalPortfolioValue(totalValue);
+        } else {
+          setTotalPortfolioValue(0);
+        }
       } else if (response.status === 404) {
         // Handle 404 gracefully - portfolio doesn't exist yet, which is fine
         console.log('No existing portfolio found for user, starting with defaults');
@@ -59,8 +67,6 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
     setError(null);
     
     try {
-      console.log('Fetching holdings for user:', userId, 'page:', currentPage);
-      
       const response = await PortfolioService.getPortfolios({
         user_id: userId,
         page: currentPage,
@@ -68,13 +74,9 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
         include_pnl: true
       });
       
-      console.log('Holdings API response:', response);
-      
       if (response.success) {
         setData(response.data);
-        console.log('Holdings data set:', response.data);
       } else {
-        console.error('Holdings API error:', response.error);
         setError(response.error || 'Failed to fetch holdings');
       }
     } catch (err) {
@@ -108,12 +110,16 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
         await PortfolioService.deletePortfolio(id);
         // Refresh the current page
         fetchHoldings();
+        // Also refresh News component when holdings are deleted
+        if (onPortfolioUpdate) {
+          onPortfolioUpdate();
+        }
       } catch (error) {
         console.error('Failed to delete portfolio item:', error);
         alert('Failed to delete item. Please try again.');
       }
     }
-  }, [fetchHoldings]);
+  }, [fetchHoldings, onPortfolioUpdate]);
 
   const handleEdit = useCallback((item: PortfolioItem) => {
     setEditItem(item);
@@ -128,7 +134,11 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
   const handleModalSuccess = useCallback(() => {
     fetchHoldings(); // Refresh the list
     handleModalClose();
-  }, [fetchHoldings, handleModalClose]);
+    // Notify parent component to refresh News component
+    if (onPortfolioUpdate) {
+      onPortfolioUpdate();
+    }
+  }, [fetchHoldings, handleModalClose, onPortfolioUpdate]);
 
   const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
@@ -218,7 +228,13 @@ const Holdings = forwardRef<HoldingsRef>((props, ref) => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={fetchHoldings}
+              onClick={() => {
+                fetchHoldings();
+                // Also refresh News component when holdings are refreshed
+                if (onPortfolioUpdate) {
+                  onPortfolioUpdate();
+                }
+              }}
               disabled={loading}
               className="p-2 text-[#495057] hover:text-[#3A86FF] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors hover:bg-white/50"
               title="Refresh Holdings"

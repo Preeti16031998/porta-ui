@@ -20,12 +20,21 @@ interface PortfolioSummaryData {
 }
 
 const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
+  console.log('PortfolioSummary component rendering...');
   const [data, setData] = useState<PortfolioSummaryData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<string>('');
 
   const userId = useUserId();
+  
+  // Debug logging for userId
+  console.log('PortfolioSummary - userId from hook:', userId);
+  console.log('PortfolioSummary - fallback userId from env:', process.env.NEXT_PUBLIC_USER_ID);
+  
+  // Use fallback userId if hook doesn't work
+  const effectiveUserId = userId || process.env.NEXT_PUBLIC_USER_ID || 'f00dc8bd-eabc-4143-b1f0-fbcb9715a02e';
+  console.log('PortfolioSummary - effective userId:', effectiveUserId);
 
   // Set time on client side only to avoid hydration mismatch
   useEffect(() => {
@@ -47,26 +56,80 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
 
   // Stable API call function
   const fetchPortfolioSummary = useCallback(async () => {
-    if (!userId) return;
+    if (!effectiveUserId) return;
     
     setLoading(true);
     setError(null);
     
     try {
-      console.log('Fetching portfolio summary for user:', userId);
+      console.log('Fetching portfolio summary for user:', effectiveUserId);
       
-      const response = await fetch(`http://localhost:8000/api/v1/portfolio/summary/total/${userId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/v1/portfolio/?user_id=${effectiveUserId}&include_pnl=true`);
       
       console.log('Portfolio summary API response status:', response.status);
       
       if (response.ok) {
-        const summaryData: PortfolioSummaryData = await response.json();
-        console.log('Portfolio summary data:', summaryData);
-        setData(summaryData);
+        const portfolioData = await response.json();
+        console.log('Portfolio data:', portfolioData);
+        
+        // Calculate summary from portfolio data
+        if (portfolioData.portfolios && portfolioData.portfolios.length > 0) {
+          const portfolios = portfolioData.portfolios;
+          
+          // Calculate totals
+          const totalValue = portfolios.reduce((sum: number, item: any) => {
+            return sum + (parseFloat(item.current_value || '0') || 0);
+          }, 0);
+          
+          const totalCost = portfolios.reduce((sum: number, item: any) => {
+            return sum + (parseFloat(item.total_cost || '0') || 0);
+          }, 0);
+          
+          const totalReturn = totalValue - totalCost;
+          const totalReturnPercentage = totalCost > 0 ? (totalReturn / totalCost) * 100 : 0;
+          
+          const summaryData: PortfolioSummaryData = {
+            total_value: totalValue.toString(),
+            total_cost: totalCost.toString(),
+            total_return: totalReturn.toString(),
+            total_return_percentage: totalReturnPercentage.toString(),
+            total_positions: portfolios.length,
+            profitable_positions: portfolios.filter((item: any) => parseFloat(item.unrealized_pnl || '0') > 0).length,
+            market_status: 'open', // Default to open for now
+            last_updated: new Date().toISOString()
+          };
+          
+          console.log('Calculated summary data:', summaryData);
+          setData(summaryData);
+        } else {
+          // No portfolios found, set default data
+          console.log('No portfolios found, setting default data');
+          const defaultData: PortfolioSummaryData = {
+            total_value: '0',
+            total_cost: '0',
+            total_return: '0',
+            total_return_percentage: '0',
+            total_positions: 0,
+            profitable_positions: 0,
+            market_status: 'open',
+            last_updated: new Date().toISOString()
+          };
+          setData(defaultData);
+        }
       } else if (response.status === 404) {
         // Handle 404 gracefully - portfolio doesn't exist yet, which is fine
         console.log('No existing portfolio found for user, starting with defaults');
-        // Keep the default data that's already set in state
+        const defaultData: PortfolioSummaryData = {
+          total_value: '0',
+          total_cost: '0',
+          total_return: '0',
+          total_return_percentage: '0',
+          total_positions: 0,
+          profitable_positions: 0,
+          market_status: 'open',
+          last_updated: new Date().toISOString()
+        };
+        setData(defaultData);
       } else {
         // Only throw errors for non-404 status codes
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,12 +147,12 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
     refresh: fetchPortfolioSummary
   }), [fetchPortfolioSummary]);
 
-  // Fetch data when component mounts or userId changes
+  // Fetch data when component mounts or effectiveUserId changes
   useEffect(() => {
-    if (userId) {
+    if (effectiveUserId) {
       fetchPortfolioSummary();
     }
-  }, [userId, fetchPortfolioSummary]);
+  }, [effectiveUserId, fetchPortfolioSummary]);
 
   const formatCurrency = useCallback((value: string | number) => {
     const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -175,7 +238,19 @@ const PortfolioSummary = forwardRef<PortfolioSummaryRef>((props, ref) => {
   }
 
   if (!data) {
-    return null;
+    return (
+      <div className="bg-[#FCFCFC] rounded-3xl shadow-lg border border-slate-300/50 p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-[#1B263B] tracking-tight">
+            Portfolio Summary
+          </h2>
+        </div>
+        <div className="text-center py-8 text-[#495057]">
+          <p>Loading portfolio data...</p>
+          <p className="text-sm mt-2">User ID: {effectiveUserId}</p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -7,7 +7,7 @@ import Holdings, { HoldingsRef } from '@/components/Holdings';
 import Watchlist, { WatchlistRef } from '@/components/Watchlist';
 
 import EarningsEvents from '@/components/EarningsEvents';
-import News from '@/components/News';
+import News, { NewsRef } from '@/components/News';
 import Chat from '@/components/Chat';
 import TestWatchlist from '@/components/TestWatchlist';
 import UserPreferencesModal from '@/components/UserPreferencesModal';
@@ -17,6 +17,18 @@ export default function Home() {
   const watchlistRef = useRef<WatchlistRef>(null);
   const holdingsRef = useRef<HoldingsRef>(null);
   const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState<string>('');
+  const chatRef = useRef<any>(null);
+  const newsRef = useRef<NewsRef>(null);
+
+  // Function to handle sending messages from News component to Chat
+  const handleNewsToChat = (message: string) => {
+    setChatMessage(message);
+    // Clear the message after a short delay to prevent re-sending
+    setTimeout(() => setChatMessage(''), 100);
+  };
+
+
 
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
@@ -47,12 +59,26 @@ export default function Home() {
           
           {/* Holdings and Watchlist Side by Side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Holdings ref={holdingsRef} />
-            <Watchlist ref={watchlistRef} />
+            <Holdings 
+              ref={holdingsRef} 
+              onPortfolioUpdate={() => {
+                if (newsRef.current?.refresh) {
+                  newsRef.current.refresh();
+                }
+              }}
+            />
+            <Watchlist 
+              ref={watchlistRef} 
+              onPortfolioUpdate={() => {
+                if (newsRef.current?.refresh) {
+                  newsRef.current.refresh();
+                }
+              }}
+            />
           </div>
           
           {/* News */}
-          <News />
+          <News ref={newsRef} onSendMessage={handleNewsToChat} />
           
           {/* Earnings & Events */}
           <EarningsEvents />
@@ -61,10 +87,15 @@ export default function Home() {
         {/* Right Column - Chat Interface */}
         <div className="w-[45%] px-6 py-6">
           <Chat 
+            ref={chatRef}
+            initialMessage={chatMessage}
             onPortfolioUpdate={() => {
               portfolioSummaryRef.current?.refresh();
               holdingsRef.current?.refresh();
               watchlistRef.current?.refresh();
+              if (newsRef.current?.refresh) {
+                newsRef.current.refresh();
+              }
             }} 
           />
         </div>

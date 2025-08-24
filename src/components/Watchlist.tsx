@@ -10,7 +10,11 @@ export interface WatchlistRef {
   refresh: () => Promise<void>;
 }
 
-const Watchlist = forwardRef<WatchlistRef>((props, ref) => {
+interface WatchlistProps {
+  onPortfolioUpdate?: () => void;
+}
+
+const Watchlist = forwardRef<WatchlistRef, WatchlistProps>(({ onPortfolioUpdate }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState<any>(null);
@@ -82,12 +86,16 @@ const Watchlist = forwardRef<WatchlistRef>((props, ref) => {
         await WatchlistService.deleteWatchlist(id);
         // Refresh the current page
         fetchWatchlist();
+        // Also refresh News component when watchlist items are deleted
+        if (onPortfolioUpdate) {
+          onPortfolioUpdate();
+        }
       } catch (error) {
         console.error('Failed to delete watchlist item:', error);
         alert('Failed to delete item. Please try again.');
       }
     }
-  }, [fetchWatchlist]);
+  }, [fetchWatchlist, onPortfolioUpdate]);
 
   const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
@@ -96,7 +104,11 @@ const Watchlist = forwardRef<WatchlistRef>((props, ref) => {
   const handleModalSuccess = useCallback(() => {
     fetchWatchlist(); // Refresh the list
     handleModalClose();
-  }, [fetchWatchlist, handleModalClose]);
+    // Notify parent component to refresh News component
+    if (onPortfolioUpdate) {
+      onPortfolioUpdate();
+    }
+  }, [fetchWatchlist, handleModalClose, onPortfolioUpdate]);
 
   const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
@@ -126,7 +138,13 @@ const Watchlist = forwardRef<WatchlistRef>((props, ref) => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={fetchWatchlist}
+              onClick={() => {
+                fetchWatchlist();
+                // Also refresh News component when watchlist is refreshed
+                if (onPortfolioUpdate) {
+                  onPortfolioUpdate();
+                }
+              }}
               disabled={loading}
               className="p-2 text-[#495057] hover:text-[#3A86FF] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors hover:bg-white/50"
               title="Refresh Watchlist"

@@ -21,9 +21,10 @@ interface ChatApiResponse {
 
 interface ChatProps {
   onPortfolioUpdate?: () => void;
+  initialMessage?: string;
 }
 
-export default function Chat({ onPortfolioUpdate }: ChatProps) {
+export default function Chat({ onPortfolioUpdate, initialMessage }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -47,23 +48,31 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+  // Handle initial message from News component
+  useEffect(() => {
+    if (initialMessage && initialMessage.trim()) {
+      // Add the message to the chat and send it
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: initialMessage,
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+      
+      // Send the message to the API
+      sendMessageToAPI(initialMessage);
+    }
+  }, [initialMessage]);
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: inputValue,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+  // Function to send message to API
+  const sendMessageToAPI = async (message: string) => {
     setIsTyping(true);
 
     try {
       console.log('Chat - Making API request to chat endpoint');
-      console.log('Chat - Request payload:', { message: inputValue, user_id: userId });
+      console.log('Chat - Request payload:', { message, user_id: userId });
       
       const response = await fetch(`${env.chat.baseUrl}/chat`, {
         method: 'POST',
@@ -71,7 +80,7 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: inputValue,
+          message: message,
           user_id: userId
         }),
       });
@@ -142,17 +151,25 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
            responseText.toLowerCase().includes('deleted') ||
            responseText.toLowerCase().includes('sold') ||
            responseText.toLowerCase().includes('bought') ||
-           responseText.toLowerCase().includes('purchased')) && 
+           responseText.toLowerCase().includes('purchased') ||
+           responseText.toLowerCase().includes('removed from') ||
+           responseText.toLowerCase().includes('taken off') ||
+           responseText.toLowerCase().includes('cleared') ||
+           responseText.toLowerCase().includes('emptied') ||
+           responseText.toLowerCase().includes('withdrawn') ||
+           responseText.toLowerCase().includes('liquidated')) && 
           (responseText.toLowerCase().includes('watchlist') || 
            responseText.toLowerCase().includes('portfolio') ||
            responseText.toLowerCase().includes('position') ||
            responseText.toLowerCase().includes('holding') ||
            responseText.toLowerCase().includes('shares') ||
-           responseText.toLowerCase().includes('stock'))
+           responseText.toLowerCase().includes('stock') ||
+           responseText.toLowerCase().includes('asset'))
         );
 
         if (isPortfolioUpdate && onPortfolioUpdate) {
           console.log('Chat - Detected portfolio/watchlist update, refreshing all components');
+          console.log('Chat - Response text that triggered update:', responseText);
           // Small delay to ensure the API call completes
           setTimeout(() => {
             onPortfolioUpdate();
@@ -198,6 +215,23 @@ export default function Chat({ onPortfolioUpdate }: ChatProps) {
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: inputValue,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    
+    // Use the extracted function
+    await sendMessageToAPI(inputValue);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
