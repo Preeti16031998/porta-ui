@@ -81,7 +81,7 @@ export default function Home() {
           <News ref={newsRef} onSendMessage={handleNewsToChat} />
           
           {/* Earnings & Events */}
-          <EarningsEvents />
+          <EarningsEvents onSendMessage={handleNewsToChat} />
         </div>
         
         {/* Right Column - Chat Interface */}

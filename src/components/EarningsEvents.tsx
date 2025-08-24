@@ -15,76 +15,25 @@ interface Event {
   timeSensitivity: 'high' | 'medium' | 'low';
 }
 
-export default function EarningsEvents() {
+interface EarningsEventsProps {
+  onSendMessage?: (message: string) => void;
+}
+
+export default function EarningsEvents({ onSendMessage }: EarningsEventsProps) {
   const [selectedRange, setSelectedRange] = useState<'This Week' | 'Next 2 Weeks' | 'Month'>('This Week');
   const [selectedFilter, setSelectedFilter] = useState<'All' | 'Earnings' | 'Dividend' | 'Guidance' | 'Product'>('All');
 
   const events: Event[] = [
     {
       id: '1',
-      ticker: 'AAPL',
-      name: 'Apple Inc.',
-      eventType: 'Earnings',
-      date: '2024-01-25',
-      time: '2:30 PM',
-      countdown: 'in 2d',
-      note: 'Q2 earnings call scheduled; consensus EPS available',
-      timeSensitivity: 'high'
-    },
-    {
-      id: '2',
-      ticker: 'MSFT',
-      name: 'Microsoft Corp.',
-      eventType: 'Product',
-      date: '2024-01-26',
-      time: '10:00 AM',
-      countdown: 'in 3d',
-      note: 'New AI product launch event',
-      timeSensitivity: 'medium'
-    },
-    {
-      id: '3',
-      ticker: 'JPM',
-      name: 'JPMorgan Chase',
-      eventType: 'Dividend',
-      date: '2024-01-27',
-      time: '9:00 AM',
-      countdown: 'in 4d',
-      note: 'Quarterly dividend payment',
-      timeSensitivity: 'low'
-    },
-    {
-      id: '4',
-      ticker: 'TSLA',
-      name: 'Tesla Inc.',
-      eventType: 'Guidance',
-      date: '2024-01-28',
-      time: '3:00 PM',
-      countdown: 'in 5d',
-      note: 'Q1 2024 production guidance update',
-      timeSensitivity: 'medium'
-    },
-    {
-      id: '5',
-      ticker: 'NVDA',
-      name: 'NVIDIA Corp.',
-      eventType: 'Earnings',
-      date: '2024-01-29',
-      time: '1:00 PM',
-      countdown: 'in 6d',
-      note: 'Q4 earnings call; AI chip demand focus',
-      timeSensitivity: 'high'
-    },
-    {
-      id: '6',
       ticker: 'AMZN',
       name: 'Amazon.com Inc.',
-      eventType: 'Product',
-      date: '2024-01-30',
-      time: '11:00 AM',
-      countdown: 'in 7d',
-      note: 'AWS new service announcements',
-      timeSensitivity: 'medium'
+      eventType: 'Earnings',
+      date: '2025-08-28',
+      time: '4:00 PM',
+      countdown: 'in 4d',
+      note: 'Q3 2025 Earnings: Amazon\'s next earnings date is projected for Thursday, October 30, 2025, after market close.',
+      timeSensitivity: 'high'
     }
   ];
 
@@ -272,17 +221,18 @@ export default function EarningsEvents() {
                       
                       {/* Action Chips */}
                       <div className="flex flex-wrap gap-2">
-                        <button className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs hover:bg-slate-200 dark:hover:bg-slate-500 transition-colors">
+                        <button 
+                          onClick={() => {
+                            if (onSendMessage) {
+                              onSendMessage(`Please explain this ${event.eventType.toLowerCase()} event for ${event.ticker}: ${event.note}`);
+                            }
+                          }}
+                          className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs hover:bg-slate-200 dark:hover:bg-slate-500 transition-colors"
+                        >
                           Explain
                         </button>
                         <button className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs hover:bg-slate-200 dark:hover:bg-slate-500 transition-colors">
-                          What to watch
-                        </button>
-                        <button className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs hover:bg-slate-200 dark:hover:bg-slate-500 transition-colors">
                           Add to calendar
-                        </button>
-                        <button className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs hover:bg-slate-200 dark:hover:bg-slate-500 transition-colors">
-                          Open source
                         </button>
                       </div>
                     </div>

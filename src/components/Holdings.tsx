@@ -278,7 +278,7 @@ const Holdings = forwardRef<HoldingsRef, HoldingsProps>(({ onPortfolioUpdate }, 
         {/* Holdings List */}
         {!loading && !error && (
           <>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-hide">
               {filteredItems.map((item: PortfolioItem) => (
                 <div
                   key={item.portfolio_id}

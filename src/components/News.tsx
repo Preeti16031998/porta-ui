@@ -378,7 +378,7 @@ const News = forwardRef<NewsRef, NewsProps>(({ onSendMessage }, ref) => {
 
 
       {/* News List */}
-      <div className="space-y-4 max-h-96 overflow-y-auto">
+      <div className="space-y-4 max-h-96 overflow-y-auto scrollbar-hide">
         {loading && news.length === 0 ? (
           <div className="text-center py-8 text-[#495057]">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3A86FF] mx-auto mb-4"></div>

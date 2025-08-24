@@ -188,7 +188,7 @@ const Watchlist = forwardRef<WatchlistRef, WatchlistProps>(({ onPortfolioUpdate 
         {/* Watchlist Items */}
         {!loading && !error && (
           <>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-hide">
               {filteredItems.map((item: WatchlistItem) => (
                 <div
                   key={item.watchlist_id}
